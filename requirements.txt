@@ -1,2 +1,2 @@
 # mediapipe
-mediapipe==0.10.0
+mediapipe==0.10.5
