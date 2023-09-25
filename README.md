@@ -5,7 +5,11 @@ VirtualVirtuoso is a project that aims to build a machine vision powered guitar,
 
 ## Table of Contents
 - [Features](#features)
+- [Dependency instalation](#dependency-instalation)
 - TO BE CONTINUED
 
 ## Features
 - This our software can dooooo
+
+## Dependency instalation
+pip install -r requirements.txt
