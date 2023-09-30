@@ -3,6 +3,10 @@ import cv2
 import time
 import pygame
 
+time_of_last_gesture = 0
+# Todo adjustable waiting time?
+waiting_time_between_gestures = 2.0
+
 pygame.mixer.init()
 
 
@@ -12,22 +16,73 @@ def play_sound(sound):
 
 
 # Find response based on recognized result
+# TODO: Implement gesture debouncer
 def gesture_response(result):
-    if result.handedness[0][0].category_name == "Right":
-        hand = 0
-    elif result.handedness[0][0].category_name == "Left":
-        hand = 1
-    # TODO: Some sort of error handling?
-    else:
+    global time_of_last_gesture
+    current_time = time.time()
+
+    # If the elapsed time is less than the cooldown duration, do nothing
+    if current_time - time_of_last_gesture < waiting_time_between_gestures:
         return
 
-    gesture_name = result.gestures[0][0].category_name
+    right_hand_gesture = None
+    left_hand_gesture = None
 
-    if gesture_name == 'Victory' and hand == 0:
-        play_sound(guitar_1)
+    first_gesture = result.gestures[0][0].category_name
+    second_gesture = result.gestures[1][0].category_name
 
+    if result.handedness[0][0].index == 0:
+        # right_hand = 0
+        right_hand_gesture = first_gesture
+        # left_hand = 1
+        left_hand_gesture = second_gesture
+    elif result.handedness[1][0].index == 1:
+        # left_hand = 0
+        left_hand_gesture = first_gesture
+        # right_hand = 1
+        right_hand_gesture = second_gesture
 
+    # Hvis høyre hånd er closed fist, akkord
+    if right_hand_gesture == 'Closed_Fist':
+        print("hello")
+        if left_hand_gesture != 'Closed_Fist':
+            if left_hand_gesture == 'Victory':
+                play_sound(C_Chord)
 
+            elif left_hand_gesture == 'Thumb_Up':
+                play_sound(D_Chord)
+
+            elif left_hand_gesture == 'Thumb_Down':
+                play_sound(E_Chord)
+
+            elif left_hand_gesture == 'Pointing_Up':
+                play_sound(F_Chord)
+
+            elif left_hand_gesture == 'Open_Palm':
+                play_sound(G_Chord)
+
+            time_of_last_gesture = current_time
+
+    # Hvis høyre hånd er open palm, tone
+    elif right_hand_gesture == 'Open_Palm':
+        print("open")
+        if left_hand_gesture != 'Closed_Fist':
+            if left_hand_gesture == 'Victory':
+                play_sound(C_Tone)
+
+            elif left_hand_gesture == 'Thumb_Up':
+                play_sound(D_Tone)
+
+            elif left_hand_gesture == 'Thumb_Down':
+                play_sound(E_Tone)
+
+            elif left_hand_gesture == 'Pointing_Up':
+                play_sound(F_Tone)
+
+            elif left_hand_gesture == 'Open_Palm':
+                play_sound(G_Tone)
+
+            time_of_last_gesture = current_time
 
 # Creates aliases for cleaner code
 BaseOptions = mp.tasks.BaseOptions
@@ -38,7 +93,17 @@ VisionRunningMode = mp.tasks.vision.RunningMode
 
 
 model_path = 'C:/Users/Thomas/ikt213g23h/prosjekt/VirtualVirtuoso/models/gesture_recognizer.task'
-guitar_1 = 'C:/Users/Thomas/ikt213g23h/prosjekt/VirtualVirtuoso/sounds/guitar-1.mp3'
+C_Chord = 'C:/Users/Thomas/ikt213g23h/prosjekt/VirtualVirtuoso/sounds/C-Chord.mp3'
+D_Chord = 'C:/Users/Thomas/ikt213g23h/prosjekt/VirtualVirtuoso/sounds/D-Chord.mp3'
+E_Chord = 'C:/Users/Thomas/ikt213g23h/prosjekt/VirtualVirtuoso/sounds/E-Chord.mp3'
+F_Chord = 'C:/Users/Thomas/ikt213g23h/prosjekt/VirtualVirtuoso/sounds/F-Chord.mp3'
+G_Chord = 'C:/Users/Thomas/ikt213g23h/prosjekt/VirtualVirtuoso/sounds/G-Chord.mp3'
+
+C_Tone = 'C:/Users/Thomas/ikt213g23h/prosjekt/VirtualVirtuoso/sounds/C.mp3'
+D_Tone = 'C:/Users/Thomas/ikt213g23h/prosjekt/VirtualVirtuoso/sounds/D.mp3'
+E_Tone = 'C:/Users/Thomas/ikt213g23h/prosjekt/VirtualVirtuoso/sounds/E.mp3'
+F_Tone = 'C:/Users/Thomas/ikt213g23h/prosjekt/VirtualVirtuoso/sounds/F.mp3'
+G_Tone = 'C:/Users/Thomas/ikt213g23h/prosjekt/VirtualVirtuoso/sounds/G.mp3'
 
 
 def print_result(result: GestureRecognizerResult, output_image: mp.Image, timestamp_ms: int):
@@ -46,9 +111,8 @@ def print_result(result: GestureRecognizerResult, output_image: mp.Image, timest
 
 
 def playsound(result: GestureRecognizerResult, output_image: mp.Image, timestamp_ms: int):
-    # Check if gestures are detected in the result
-    if result.gestures:
-        # Access the first detected gesture's category_name
+    # print('gesture recognition result: {}'.format(result))
+    if len(result.gestures) == 2:
         gesture_response(result)
 
 
@@ -56,7 +120,9 @@ def playsound(result: GestureRecognizerResult, output_image: mp.Image, timestamp
 options = GestureRecognizerOptions(
     base_options=BaseOptions(model_asset_path=model_path),
     running_mode=VisionRunningMode.LIVE_STREAM,
-    result_callback=playsound)
+    result_callback=playsound,
+    num_hands=2
+)
 
 
 # Initialize OpenCV video capture
