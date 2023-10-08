@@ -16,7 +16,6 @@ def play_sound(sound):
 
 
 # Find response based on recognized result
-# TODO: Implement gesture debouncer
 def gesture_response(result):
     global time_of_last_gesture
     current_time = time.time()
@@ -63,6 +62,7 @@ def gesture_response(result):
 
             time_of_last_gesture = current_time
 
+
     # Hvis høyre hånd er open palm, tone
     elif right_hand_gesture == 'Open_Palm':
         print("open")
@@ -84,6 +84,7 @@ def gesture_response(result):
 
             time_of_last_gesture = current_time
 
+
 # Creates aliases for cleaner code
 BaseOptions = mp.tasks.BaseOptions
 GestureRecognizer = mp.tasks.vision.GestureRecognizer
@@ -92,18 +93,18 @@ GestureRecognizerResult = mp.tasks.vision.GestureRecognizerResult
 VisionRunningMode = mp.tasks.vision.RunningMode
 
 
-model_path = 'C:/Users/Thomas/ikt213g23h/prosjekt/VirtualVirtuoso/models/gesture_recognizer.task'
-C_Chord = 'C:/Users/Thomas/ikt213g23h/prosjekt/VirtualVirtuoso/sounds/C-Chord.mp3'
-D_Chord = 'C:/Users/Thomas/ikt213g23h/prosjekt/VirtualVirtuoso/sounds/D-Chord.mp3'
-E_Chord = 'C:/Users/Thomas/ikt213g23h/prosjekt/VirtualVirtuoso/sounds/E-Chord.mp3'
-F_Chord = 'C:/Users/Thomas/ikt213g23h/prosjekt/VirtualVirtuoso/sounds/F-Chord.mp3'
-G_Chord = 'C:/Users/Thomas/ikt213g23h/prosjekt/VirtualVirtuoso/sounds/G-Chord.mp3'
+model_path = 'models/gesture_recognizer.task'
+C_Chord = 'sounds/C-Chord.mp3'
+D_Chord = 'sounds/D-Chord.mp3'
+E_Chord = 'sounds/E-Chord.mp3'
+F_Chord = 'sounds/F-Chord.mp3'
+G_Chord = 'sounds/G-Chord.mp3'
 
-C_Tone = 'C:/Users/Thomas/ikt213g23h/prosjekt/VirtualVirtuoso/sounds/C.mp3'
-D_Tone = 'C:/Users/Thomas/ikt213g23h/prosjekt/VirtualVirtuoso/sounds/D.mp3'
-E_Tone = 'C:/Users/Thomas/ikt213g23h/prosjekt/VirtualVirtuoso/sounds/E.mp3'
-F_Tone = 'C:/Users/Thomas/ikt213g23h/prosjekt/VirtualVirtuoso/sounds/F.mp3'
-G_Tone = 'C:/Users/Thomas/ikt213g23h/prosjekt/VirtualVirtuoso/sounds/G.mp3'
+C_Tone = 'sounds/C.mp3'
+D_Tone = 'sounds/D.mp3'
+E_Tone = 'sounds/E.mp3'
+F_Tone = 'sounds/F.mp3'
+G_Tone = 'sounds/G.mp3'
 
 
 def print_result(result: GestureRecognizerResult, output_image: mp.Image, timestamp_ms: int):
