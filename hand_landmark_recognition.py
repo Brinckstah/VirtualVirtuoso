@@ -13,7 +13,7 @@ def play_sound_nonblocking(sound):
     pygame.mixer.music.play()
 
 
-guitar_1 = ("C:/Users/Thomas/ikt213g23h/prosjekt/VirtualVirtuoso/sounds/guitar-1.mp3")
+guitar_1 = ("C:/Users/Thomas/ikt213g23h/prosjekt/VirtualVirtuoso/sounds/D-Chord.mp3")
 
 mp_hands = mp.solutions.hands
 mp_drawing = mp.solutions.drawing_utils

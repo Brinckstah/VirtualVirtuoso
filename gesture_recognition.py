@@ -49,13 +49,13 @@ def gesture_response(result):
                 play_sound(C_Chord)
 
             elif left_hand_gesture == 'Thumb_Up':
-                play_sound(D_Chord)
+                play_sound(G_Chord)
 
             elif left_hand_gesture == 'Thumb_Down':
-                play_sound(E_Chord)
+                play_sound(F_Chord)
 
             elif left_hand_gesture == 'Pointing_Up':
-                play_sound(F_Chord)
+                play_sound(Am_Chord)
 
             elif left_hand_gesture == 'Open_Palm':
                 play_sound(G_Chord)
@@ -94,11 +94,13 @@ VisionRunningMode = mp.tasks.vision.RunningMode
 
 
 model_path = 'models/gesture_recognizer.task'
-C_Chord = 'sounds/C-Chord.mp3'
-D_Chord = 'sounds/D-Chord.mp3'
-E_Chord = 'sounds/E-Chord.mp3'
-F_Chord = 'sounds/F-Chord.mp3'
-G_Chord = 'sounds/G-Chord.mp3'
+C_Chord = 'sounds/Cmaj.mp3'
+Dmin_Chord = 'sounds/Dmin.mp3'
+Emin_Chord = 'sounds/Emin.mp3'
+F_Chord = 'sounds/Fmaj.mp3'
+G_Chord = 'sounds/Gmaj.mp3'
+Am_Chord = 'sounds/Amin.mp3'
+Bdim_Chord = 'sounds/Bdim.mp3'
 
 C_Tone = 'sounds/C.mp3'
 D_Tone = 'sounds/D.mp3'
@@ -139,6 +141,8 @@ with GestureRecognizer.create_from_options(options) as recognizer:
         if not ret:
             break
 
+        y, x, channels = frame.shape
+
         # Convert the BGR frame to RGB.
         # OpenCV reads image data in BGR, while mediaPipe expects RGB
         frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
@@ -152,6 +156,9 @@ with GestureRecognizer.create_from_options(options) as recognizer:
 
         # Recognize gesture
         recognizer.recognize_async(mp_image, frame_timestamp_ms)
+
+        # Draw a horizontal line to facilitate dynamic right hand detection
+        cv2.line(frame, (0, int(0.75*y)), (int(x), int(0.75*y)), (0, 255, 0), 3)
 
         # Show the current frame
         cv2.imshow('Gesture Recognition', frame)
