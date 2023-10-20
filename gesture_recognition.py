@@ -1,13 +1,14 @@
 import mediapipe as mp
+from mediapipe.tasks import python
+from mediapipe.tasks.python import vision
 import cv2
 import time
 import pygame
 
-time_of_last_gesture = 0
-# Todo adjustable waiting time?
-waiting_time_between_gestures = 2.0
 
 pygame.mixer.init()
+
+last_played_y_coordinate = -1
 
 
 def play_sound(sound):
@@ -15,74 +16,131 @@ def play_sound(sound):
     pygame.mixer.music.play()
 
 
-# Find response based on recognized result
-def gesture_response(result):
-    global time_of_last_gesture
-    current_time = time.time()
-
-    # If the elapsed time is less than the cooldown duration, do nothing
-    if current_time - time_of_last_gesture < waiting_time_between_gestures:
-        return
-
+def find_right_and_left_gesture(result):
+    # TODO: Verify that indexation is correct
     right_hand_gesture = None
     left_hand_gesture = None
 
     first_gesture = result.gestures[0][0].category_name
     second_gesture = result.gestures[1][0].category_name
 
-    if result.handedness[0][0].index == 0:
+    if result.handedness[0][0].category_name == "Right":
         # right_hand = 0
         right_hand_gesture = first_gesture
         # left_hand = 1
         left_hand_gesture = second_gesture
-    elif result.handedness[1][0].index == 1:
+
+    elif result.handedness[0][0].category_name == "Left":
         # left_hand = 0
         left_hand_gesture = first_gesture
         # right_hand = 1
         right_hand_gesture = second_gesture
 
+    return right_hand_gesture, left_hand_gesture
+
+
+def find_y_coordinate(result, landmark):
+    y_coordinate = 0
+    index = 0
+
+    if landmark == "Thumb":
+        index = 3
+    elif landmark == "Index":
+        index = 7
+
+    if result.handedness[0][0].category_name == "Right":
+        y_coordinate = result.hand_landmarks[0][index].y
+    elif result.handedness[0][0].category_name == "Left":
+        y_coordinate = result.hand_landmarks[1][index].y
+
+    return y_coordinate
+
+
+def hello_from_the_other_side(result, landmark):
+    y_coordinate = find_y_coordinate(result, landmark)
+
+    if last_played_y_coordinate > 0.5:
+        if y_coordinate <= 0.5:
+            return True
+        else:
+            return False
+
+    elif last_played_y_coordinate <= 0.5:
+        if y_coordinate > 0.5:
+            return True
+        else:
+            return False
+
+
+def up_or_down_strum():
+    if last_played_y_coordinate > 0.5:
+        return 0
+    else:
+        return 1
+
+
+# Find response based on recognized result
+def gesture_response(result):
+    global last_played_y_coordinate
+    right_hand_gesture, left_hand_gesture = find_right_and_left_gesture(result)
+
     # Hvis høyre hånd er closed fist, akkord
-    if right_hand_gesture == 'Closed_Fist':
-        print("hello")
-        if left_hand_gesture != 'Closed_Fist':
-            if left_hand_gesture == 'Victory':
+    if right_hand_gesture == 'Thumb_Up':
+        if not hello_from_the_other_side(result, "Thumb"):
+            print("Same side")
+            return
+        print("Other side")
+        if left_hand_gesture == 'Victory':
+
+            if up_or_down_strum() == 0:
                 play_sound(C_Chord)
 
-            elif left_hand_gesture == 'Thumb_Up':
-                play_sound(G_Chord)
+            elif up_or_down_strum() == 1:
+                print("Up")
 
-            elif left_hand_gesture == 'Thumb_Down':
-                play_sound(F_Chord)
+            last_played_y_coordinate = find_y_coordinate(result, "Thumb")
 
-            elif left_hand_gesture == 'Pointing_Up':
-                play_sound(Am_Chord)
+        elif left_hand_gesture == 'Thumb_Up':
+            play_sound(G_Chord)
+            last_played_y_coordinate = find_y_coordinate(result, "Thumb")
 
-            elif left_hand_gesture == 'Open_Palm':
-                play_sound(G_Chord)
+        elif left_hand_gesture == 'Thumb_Down':
+            play_sound(F_Chord)
+            last_played_y_coordinate = find_y_coordinate(result, "Thumb")
 
-            time_of_last_gesture = current_time
+        elif left_hand_gesture == 'Pointing_Up':
+            play_sound(Am_Chord)
+            last_played_y_coordinate = find_y_coordinate(result, "Thumb")
 
+        elif left_hand_gesture == 'Open_Palm':
+            play_sound(G_Chord)
+            last_played_y_coordinate = find_y_coordinate(result, "Thumb")
 
-    # Hvis høyre hånd er open palm, tone
-    elif right_hand_gesture == 'Open_Palm':
-        print("open")
-        if left_hand_gesture != 'Closed_Fist':
-            if left_hand_gesture == 'Victory':
-                play_sound(C_Tone)
+    else:
+        if not hello_from_the_other_side(result, "Index"):
+            print("Same side index")
+            return
+        print("Other side index")
 
-            elif left_hand_gesture == 'Thumb_Up':
-                play_sound(D_Tone)
+        if left_hand_gesture == 'Victory':
+            play_sound(C_Tone)
+            last_played_y_coordinate = find_y_coordinate(result, "Index")
 
-            elif left_hand_gesture == 'Thumb_Down':
-                play_sound(E_Tone)
+        elif left_hand_gesture == 'Thumb_Up':
+            play_sound(D_Tone)
+            last_played_y_coordinate = find_y_coordinate(result, "Index")
 
-            elif left_hand_gesture == 'Pointing_Up':
-                play_sound(F_Tone)
+        elif left_hand_gesture == 'Thumb_Down':
+            play_sound(E_Tone)
+            last_played_y_coordinate = find_y_coordinate(result, "Index")
 
-            elif left_hand_gesture == 'Open_Palm':
-                play_sound(G_Tone)
+        elif left_hand_gesture == 'Pointing_Up':
+            play_sound(F_Tone)
+            last_played_y_coordinate = find_y_coordinate(result, "Index")
 
-            time_of_last_gesture = current_time
+        elif left_hand_gesture == 'Open_Palm':
+            play_sound(G_Tone)
+            last_played_y_coordinate = find_y_coordinate(result, "Index")
 
 
 # Creates aliases for cleaner code
@@ -109,14 +167,14 @@ F_Tone = 'sounds/F.mp3'
 G_Tone = 'sounds/G.mp3'
 
 
-def print_result(result: GestureRecognizerResult, output_image: mp.Image, timestamp_ms: int):
-    print('gesture recognition result: {}'.format(result))
-
-
 def playsound(result: GestureRecognizerResult, output_image: mp.Image, timestamp_ms: int):
     # print('gesture recognition result: {}'.format(result))
     if len(result.gestures) == 2:
         gesture_response(result)
+
+
+def print_result(result: GestureRecognizerResult, output_image: mp.Image, timestamp_ms: int):
+    print('gesture recognition result: {}'.format(result))
 
 
 # Setting gesture recognizer options
@@ -127,6 +185,8 @@ options = GestureRecognizerOptions(
     num_hands=2
 )
 
+
+y_threshold = 240
 
 # Initialize OpenCV video capture
 VideoCapture = cv2.VideoCapture(0)
@@ -158,7 +218,7 @@ with GestureRecognizer.create_from_options(options) as recognizer:
         recognizer.recognize_async(mp_image, frame_timestamp_ms)
 
         # Draw a horizontal line to facilitate dynamic right hand detection
-        cv2.line(frame, (0, int(0.75*y)), (int(x), int(0.75*y)), (0, 255, 0), 3)
+        cv2.line(frame, (0, int(0.5*y)), (int(x), int(0.5*y)), (0, 255, 0), 3)
 
         # Show the current frame
         cv2.imshow('Gesture Recognition', frame)
