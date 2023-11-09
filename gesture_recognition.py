@@ -1,12 +1,12 @@
 import mediapipe as mp
 from mediapipe.tasks import python
-from mediapipe.tasks.python import vision
 import cv2
 import time
 import pygame
 
 
 pygame.mixer.init()
+
 
 last_played_y_coordinate = -1
 
@@ -44,9 +44,9 @@ def find_y_coordinate(result, landmark):
     index = 0
 
     if landmark == "Thumb":
-        index = 3
+        index = 4
     elif landmark == "Index":
-        index = 7
+        index = 8
 
     if result.handedness[0][0].category_name == "Right":
         y_coordinate = result.hand_landmarks[0][index].y
@@ -54,6 +54,31 @@ def find_y_coordinate(result, landmark):
         y_coordinate = result.hand_landmarks[1][index].y
 
     return y_coordinate
+
+
+def is_picking(result):
+    try:
+        index_tip = None
+        hand = None
+
+        if result.handedness[0][0].category_name == "Right":
+            index_tip = result.hand_landmarks[0][8].x
+            hand = 0
+
+        elif result.handedness[0][0].category_name == "Left":
+            index_tip = result.hand_landmarks[1][8].x
+            hand = 1
+
+        if (index_tip > result.hand_landmarks[hand][6].x and
+                index_tip > result.hand_landmarks[hand][12].x and
+                index_tip > result.hand_landmarks[hand][16].x and
+                index_tip > result.hand_landmarks[hand][20].x):
+            return True
+        else:
+            return False
+    except Exception as e:
+        print(e)
+        return False
 
 
 def hello_from_the_other_side(result, landmark):
@@ -87,16 +112,14 @@ def gesture_response(result):
     # Hvis høyre hånd er closed fist, akkord
     if right_hand_gesture == 'Thumb_Up':
         if not hello_from_the_other_side(result, "Thumb"):
-            print("Same side")
             return
-        print("Other side")
         if left_hand_gesture == 'Victory':
 
-            if up_or_down_strum() == 0:
-                play_sound(C_Chord)
+            #if up_or_down_strum() == 0:
+            play_sound(C_Chord)
 
-            elif up_or_down_strum() == 1:
-                print("Up")
+            #elif up_or_down_strum() == 1:
+            #    print("Up")
 
             last_played_y_coordinate = find_y_coordinate(result, "Thumb")
 
@@ -113,14 +136,12 @@ def gesture_response(result):
             last_played_y_coordinate = find_y_coordinate(result, "Thumb")
 
         elif left_hand_gesture == 'Open_Palm':
-            play_sound(G_Chord)
+            play_sound(Bdim_Chord)
             last_played_y_coordinate = find_y_coordinate(result, "Thumb")
 
-    else:
+    elif is_picking(result):
         if not hello_from_the_other_side(result, "Index"):
-            print("Same side index")
             return
-        print("Other side index")
 
         if left_hand_gesture == 'Victory':
             play_sound(C_Tone)
