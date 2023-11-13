@@ -123,12 +123,14 @@ def gesture_response(result):
 
             last_played_y_coordinate = find_y_coordinate(result, "Thumb")
 
-        elif left_hand_gesture == 'Thumb_Up':
-            play_sound(G_Chord)
-            last_played_y_coordinate = find_y_coordinate(result, "Thumb")
+        elif left_hand_gesture == 'Love_You_Gesture':
 
         elif left_hand_gesture == 'Thumb_Down':
             play_sound(F_Chord)
+            last_played_y_coordinate = find_y_coordinate(result, "Thumb")
+
+        elif left_hand_gesture == 'Thumb_Up':
+            play_sound(G_Chord)
             last_played_y_coordinate = find_y_coordinate(result, "Thumb")
 
         elif left_hand_gesture == 'Pointing_Up':
