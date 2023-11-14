@@ -13,7 +13,6 @@ string_distance = 0.05
 frame_queue = queue.Queue()
 
 
-
 # Creates aliases for cleaner code
 BaseOptions = mp.tasks.BaseOptions
 GestureRecognizer = mp.tasks.vision.GestureRecognizer

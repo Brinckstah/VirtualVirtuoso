@@ -24,7 +24,6 @@ def hello_from_the_other_side(result, landmark):
             return False
 
 
-
 # Find response based on recognized result
 def gesture_response(right_hand_gesture, left_hand_gesture, result):
     if right_hand_gesture == 'Thumb_Up':
@@ -81,7 +80,11 @@ def gesture_response(right_hand_gesture, left_hand_gesture, result):
             elif gesture_recognition.up_or_down_strum() == 1:
                 sound.channel1.play(sound.B_R)
 
+        else:
+            print("Invalid chord")
+            return
         config.last_played_y_coordinate = y_coordinate
+
 
     elif gesture_recognition.is_picking(result):
         if left_hand_gesture == 'Victory':
