@@ -48,3 +48,4 @@ def is_finger_down(hand_landmarks):
         return True
     else:
         return False
+

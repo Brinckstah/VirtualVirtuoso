@@ -6,8 +6,13 @@ import chord_strum
 import config
 import gesture_recognition
 import single_string_chords
+import queue
+import threading
 
 string_distance = 0.05
+frame_queue = queue.Queue()
+
+
 
 # Creates aliases for cleaner code
 BaseOptions = mp.tasks.BaseOptions
@@ -44,13 +49,38 @@ def print_result(result: GestureRecognizerResult, output_image: mp.Image, timest
     print('gesture recognition result: {}'.format(result))
 
 
+def dummy_callback_function(result: GestureRecognizerResult, output_image: mp.Image, timestamp_ms: int):
+    pass
+
 # Setting gesture recognizer options
 options = GestureRecognizerOptions(
     base_options=BaseOptions(model_asset_path=model_path),
     running_mode=VisionRunningMode.LIVE_STREAM,
-    result_callback=playsound,
-    num_hands=2
+    num_hands=2,
+    result_callback=dummy_callback_function
 )
+
+
+def gesture_recognition_and_audio_playback(frame_queue: queue.Queue):
+    def process_result_callback(result: GestureRecognizerResult, output_image: mp.Image, timestamp_ms: int):
+        playsound(result, output_image, timestamp_ms)
+
+    options.result_callback = process_result_callback
+    recognizer = GestureRecognizer.create_from_options(options)
+
+    while True:
+        if not frame_queue.empty():
+            break
+        first_frame = frame_queue.get()
+
+        mp_image = mp.Image(image_format=mp.ImageFormat.SRGB, data=first_frame)
+        timestamp = int(time.time() * 1000)
+
+        recognizer.recognize_async(mp_image, timestamp)
+
+
+gesture_thread = threading.Thread(target=gesture_recognition_and_audio_playback, args=(frame_queue,))
+gesture_thread.start()
 
 
 y_threshold = 240
@@ -63,49 +93,42 @@ VideoCapture.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
 
 start_time = time.time()
 
-with GestureRecognizer.create_from_options(options) as recognizer:
-    while VideoCapture.isOpened():
-        ret, frame = VideoCapture.read()
 
-        # Checks if there is an issue with frame capture, and breaks if there is
-        if not ret:
-            break
+while VideoCapture.isOpened():
+    ret, frame = VideoCapture.read()
 
-        y, x, channels = frame.shape
+    # Checks if there is an issue with frame capture, and breaks if there is
+    if not ret:
+        break
+
+    y, x, _ = frame.shape
 
         # Convert the BGR frame to RGB.
         # OpenCV reads image data in BGR, while mediaPipe expects RGB
-        frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+    frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
-        # Create mediaPipe image object.
-        # SRGB = standard RGB
-        mp_image = mp.Image(image_format=mp.ImageFormat.SRGB, data=frame_rgb)
+    frame_queue.put(frame_rgb)
 
-        # Calculate frame timestamp for recognized
-        frame_timestamp_ms = int((time.time() - start_time) * 1000)
 
-        # Recognize gesture
-        recognizer.recognize_async(mp_image, frame_timestamp_ms)
-
-        # Draw a horizontal line to facilitate dynamic right hand detection
-        cv2.line(frame, (0, int(0.5 * y)), (int(x), int(0.5 * y)), (0, 255, 0), 1)
-        cv2.line(frame, (0, int((0.5 + string_distance) * y)), (int(x), int((0.5 + string_distance) * y)), (0, 255, 0),
+    # Draw a horizontal line to facilitate dynamic right hand detection
+    cv2.line(frame, (0, int(0.5 * y)), (int(x), int(0.5 * y)), (0, 255, 0), 1)
+    cv2.line(frame, (0, int((0.5 + string_distance) * y)), (int(x), int((0.5 + string_distance) * y)), (0, 255, 0),
                  1)
-        cv2.line(frame, (0, int((0.5 + 2 * string_distance) * y)), (int(x), int((0.5 + 2 * string_distance) * y)),
+    cv2.line(frame, (0, int((0.5 + 2 * string_distance) * y)), (int(x), int((0.5 + 2 * string_distance) * y)),
                  (0, 255, 0), 1)
-        cv2.line(frame, (0, int((0.5 + 3 * string_distance) * y)), (int(x), int((0.5 + 3 * string_distance) * y)),
+    cv2.line(frame, (0, int((0.5 + 3 * string_distance) * y)), (int(x), int((0.5 + 3 * string_distance) * y)),
                  (0, 255, 0), 1)
-        cv2.line(frame, (0, int((0.5 + 4 * string_distance) * y)), (int(x), int((0.5 + 4 * string_distance) * y)),
+    cv2.line(frame, (0, int((0.5 + 4 * string_distance) * y)), (int(x), int((0.5 + 4 * string_distance) * y)),
                  (0, 255, 0), 1)
-        cv2.line(frame, (0, int((0.5 + 5 * string_distance) * y)), (int(x), int((0.5 + 5 * string_distance) * y)),
+    cv2.line(frame, (0, int((0.5 + 5 * string_distance) * y)), (int(x), int((0.5 + 5 * string_distance) * y)),
                  (0, 255, 0), 1)
 
         # Show the current frame
-        cv2.imshow('Gesture Recognition', frame)
+    cv2.imshow('Gesture Recognition', frame)
 
         # Press q to quit
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            break
+    if cv2.waitKey(1) & 0xFF == ord('q'):
+        break
 
 # Close the VideoCapture
 VideoCapture.release()
