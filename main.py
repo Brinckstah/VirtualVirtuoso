@@ -89,15 +89,13 @@ def render_text(frame):
         text = "Mode: Single String Picking"
     font = cv2.FONT_HERSHEY_SIMPLEX
     font_scale = 0.6
-    color = (255, 255, 255)  # White color
-    thickness = 2
+    color = (255, 255, 255)
+    thickness = 1
     text_size, _ = cv2.getTextSize(text, font, font_scale, thickness)
 
-    # Calculate text position (upper right corner)
-    text_x = frame.shape[1] - text_size[0] - 10  # 10 pixels from the right edge
-    text_y = text_size[1] + 10  # 10 pixels from the top
+    text_x = frame.shape[1] - text_size[0] - 10
+    text_y = text_size[1] + 10
 
-    # Draw the text on the frame
     cv2.putText(frame, text, (text_x, text_y), font, font_scale, color, thickness)
 
 
@@ -114,14 +112,12 @@ def main():
     while VideoCapture.isOpened():
         ret, frame = VideoCapture.read()
 
-        # Checks if there is an issue with frame capture, and breaks if there isq
+        # Checks if there is an issue with frame capture, and breaks if there is
         if not ret:
             break
 
         y, x, _ = frame.shape
 
-        # Convert the BGR frame to RGB.
-        # OpenCV reads image data in BGR, while mediaPipe expects RGB
         frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         frame_queue.put(frame_rgb)
 
