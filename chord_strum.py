@@ -24,67 +24,72 @@ def hello_from_the_other_side(result, landmark):
             return False
 
 
+def up_or_down(y_coordinate):
+    if y_coordinate < 0.5:
+        return 0
+    else:
+        return 1
+
+
 # Find response based on recognized result
 def gesture_response(right_hand_gesture, left_hand_gesture, result):
     if right_hand_gesture == 'Thumb_Up':
         if not hello_from_the_other_side(result, "Thumb"):
             return
         y_coordinate = gesture_recognition.find_y_coordinate(result, "Thumb")
+        direction = up_or_down(y_coordinate)
         if left_hand_gesture == 'Victory':
-            if gesture_recognition.up_or_down_strum() == 0:
+            if direction == 0:
                 sound.channel1.play(sound.Cmaj_Chord)
 
-            elif gesture_recognition.up_or_down_strum() == 1:
+            elif direction == 1:
                 sound.channel1.play(sound.C_R)
 
         elif left_hand_gesture == 'ILoveYou':
-            if gesture_recognition.up_or_down_strum() == 0:
+            if direction == 0:
                 sound.channel1.play(sound.Dmin_Chord)
 
-            elif gesture_recognition.up_or_down_strum() == 1:
+            elif direction == 1:
                 sound.channel1.play(sound.D_R)
 
-        elif left_hand_gesture == 'Thumb_Up':
-            if gesture_recognition.up_or_down_strum() == 0:
+        elif gesture_recognition.is_pinky_up(result):
+            if direction == 0:
                 sound.channel1.play(sound.Emin_Chord)
 
-            elif gesture_recognition.up_or_down_strum() == 1:
+            elif direction == 1:
                 sound.channel1.play(sound.E_R)
 
         elif left_hand_gesture == 'Closed_Fist':
-            if gesture_recognition.up_or_down_strum() == 0:
+            if direction == 0:
                 sound.channel1.play(sound.Fmaj_Chord)
 
-            elif gesture_recognition.up_or_down_strum() == 1:
+            elif direction == 1:
                 sound.channel1.play(sound.F_R)
 
         elif left_hand_gesture == 'Pointing_Up':
-            if gesture_recognition.up_or_down_strum() == 0:
+            if direction == 0:
                 sound.channel1.play(sound.Gmaj_Chord)
 
-            elif gesture_recognition.up_or_down_strum() == 1:
+            elif direction == 1:
                 sound.channel1.play(sound.G_R)
 
         elif left_hand_gesture == 'Open_Palm':
-            if gesture_recognition.up_or_down_strum() == 0:
+            if direction == 0:
                 sound.channel1.play(sound.Amin_Chord)
 
-            elif gesture_recognition.up_or_down_strum() == 1:
+            elif direction == 1:
                 sound.channel1.play(sound.A_R)
 
-        #elif left_hand_gesture == 'Thumb_Down':
         elif gesture_recognition.is_gesture_L(result):
-            if gesture_recognition.up_or_down_strum() == 0:
+            if direction == 0:
                 sound.channel1.play(sound.Bdim_Chord)
 
-            elif gesture_recognition.up_or_down_strum() == 1:
+            elif direction == 1:
                 sound.channel1.play(sound.B_R)
 
         else:
-            print("Invalid chord")
             return
         config.last_played_y_coordinate = y_coordinate
-
 
     elif gesture_recognition.is_picking(result):
         if left_hand_gesture == 'Victory':
@@ -93,7 +98,7 @@ def gesture_response(right_hand_gesture, left_hand_gesture, result):
         elif left_hand_gesture == 'ILoveYou':
             single_string_chords.tone_selector(result, "D")
 
-        elif left_hand_gesture == 'Thumb_Up':
+        elif gesture_recognition.is_pinky_up(result):
             single_string_chords.tone_selector(result, "E")
 
         elif left_hand_gesture == 'Closed_Fist':
@@ -105,7 +110,7 @@ def gesture_response(right_hand_gesture, left_hand_gesture, result):
         elif left_hand_gesture == 'Open_Palm':
             single_string_chords.tone_selector(result, "A")
 
-        elif left_hand_gesture == 'Thumb_Down':
+        elif gesture_recognition.is_gesture_L(result):
             single_string_chords.tone_selector(result, "B")
 
             """

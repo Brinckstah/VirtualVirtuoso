@@ -2,16 +2,16 @@ import mediapipe as mp
 from mediapipe.tasks import python
 import cv2
 import time
-import chord_strum
+
+from chord_strum import gesture_response
 import config
 import gesture_recognition
-import single_string_chords
+from single_string import single_tone
 import queue
 import threading
 
 string_distance = 0.05
 frame_queue = queue.Queue()
-
 
 # Creates aliases for cleaner code
 BaseOptions = mp.tasks.BaseOptions
@@ -22,25 +22,30 @@ VisionRunningMode = mp.tasks.vision.RunningMode
 
 model_path = 'models/gesture_recognizer.task'
 
+list_of_gestures = ['Victory', 'ILoveYou', 'Thumb_Up', 'Closed_Fist', 'Pointing_Up', 'Open_Palm', 'Thumb_Down']
+
 
 def playsound(result: GestureRecognizerResult, output_image: mp.Image, timestamp_ms: int):
     try:
-        if len(result.gestures) == 2:
+        right_hand_gesture, left_hand_gesture = gesture_recognition.find_right_and_left_gesture(result)
+        if right_hand_gesture == 'Victory':
+            config.mode = 1
+            return
 
-            right_hand_gesture, left_hand_gesture = gesture_recognition.find_right_and_left_gesture(result)
+        elif right_hand_gesture == 'Thumb_Down':
+            config.mode = 2
+            return
 
-            if right_hand_gesture == 'Pointing_Up':
-                config.mode = 1
-
-            elif right_hand_gesture == 'Victory':
-                config.mode = 2
+        if len(result.gestures) == 2 and (left_hand_gesture in list_of_gestures or gesture_recognition.is_gesture_L(result) or gesture_recognition.is_pinky_up(result)):
             if config.mode == 1:
-                chord_strum.gesture_response(right_hand_gesture, left_hand_gesture, result)
+                gesture_response(right_hand_gesture, left_hand_gesture, result)
             elif config.mode == 2:
-                single_string_chords.tone_selector(result, left_hand_gesture)
+                single_tone(left_hand_gesture, result)
+
+        else:
+            print("No gesture detected")
 
     except Exception as e:
-        print(e)
         pass
 
 
@@ -82,6 +87,26 @@ gesture_thread = threading.Thread(target=gesture_recognition_and_audio_playback,
 gesture_thread.start()
 
 
+def render_text():
+    text = None
+    if config.mode == 1:
+        text = "Mode: Chord Strumming"
+    elif config.mode == 2:
+        text = "Mode: Single String Picking"
+    font = cv2.FONT_HERSHEY_SIMPLEX
+    font_scale = 0.6
+    color = (255, 255, 255)  # White color
+    thickness = 2
+    text_size, _ = cv2.getTextSize(text, font, font_scale, thickness)
+
+    # Calculate text position (upper right corner)
+    text_x = frame.shape[1] - text_size[0] - 10  # 10 pixels from the right edge
+    text_y = text_size[1] + 10  # 10 pixels from the top
+
+    # Draw the text on the frame
+    cv2.putText(frame, text, (text_x, text_y), font, font_scale, color, thickness)
+
+
 y_threshold = 240
 
 # Initialize OpenCV video capture
@@ -96,36 +121,39 @@ start_time = time.time()
 while VideoCapture.isOpened():
     ret, frame = VideoCapture.read()
 
-    # Checks if there is an issue with frame capture, and breaks if there is
+    # Checks if there is an issue with frame capture, and breaks if there isq
     if not ret:
         break
 
     y, x, _ = frame.shape
 
-        # Convert the BGR frame to RGB.
-        # OpenCV reads image data in BGR, while mediaPipe expects RGB
+    # Convert the BGR frame to RGB.
+    # OpenCV reads image data in BGR, while mediaPipe expects RGB
     frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-
     frame_queue.put(frame_rgb)
 
+    render_text()
 
-    # Draw a horizontal line to facilitate dynamic right hand detection
-    cv2.line(frame, (0, int(0.5 * y)), (int(x), int(0.5 * y)), (0, 255, 0), 1)
-    cv2.line(frame, (0, int((0.5 + string_distance) * y)), (int(x), int((0.5 + string_distance) * y)), (0, 255, 0),
+    if config.mode == 1:
+        cv2.line(frame, (0, int(0.5 * y)), (int(x), int(0.5 * y)), (0, 255, 0), 1)
+        cv2.line(frame, (0, int((0.5 + string_distance) * y)), (int(x), int((0.5 + string_distance) * y)), (0, 255, 0),
                  1)
-    cv2.line(frame, (0, int((0.5 + 2 * string_distance) * y)), (int(x), int((0.5 + 2 * string_distance) * y)),
+        cv2.line(frame, (0, int((0.5 + 2 * string_distance) * y)), (int(x), int((0.5 + 2 * string_distance) * y)),
                  (0, 255, 0), 1)
-    cv2.line(frame, (0, int((0.5 + 3 * string_distance) * y)), (int(x), int((0.5 + 3 * string_distance) * y)),
+        cv2.line(frame, (0, int((0.5 + 3 * string_distance) * y)), (int(x), int((0.5 + 3 * string_distance) * y)),
                  (0, 255, 0), 1)
-    cv2.line(frame, (0, int((0.5 + 4 * string_distance) * y)), (int(x), int((0.5 + 4 * string_distance) * y)),
+        cv2.line(frame, (0, int((0.5 + 4 * string_distance) * y)), (int(x), int((0.5 + 4 * string_distance) * y)),
                  (0, 255, 0), 1)
-    cv2.line(frame, (0, int((0.5 + 5 * string_distance) * y)), (int(x), int((0.5 + 5 * string_distance) * y)),
+        cv2.line(frame, (0, int((0.5 + 5 * string_distance) * y)), (int(x), int((0.5 + 5 * string_distance) * y)),
                  (0, 255, 0), 1)
 
-        # Show the current frame
+    elif config.mode == 2:
+        cv2.line(frame, (0, int(0.5 * y)), (int(x), int(0.5 * y)), (0, 255, 0), 1)
+
+    # Show the current frame
     cv2.imshow('Gesture Recognition', frame)
 
-        # Press q to quit
+    # Press q to quit
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
 

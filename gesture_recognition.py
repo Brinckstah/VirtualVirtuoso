@@ -110,3 +110,39 @@ def is_gesture_L(result):
     except Exception as e:
         print(e)
         return False
+
+
+def is_pinky_up(result):
+    try:
+        index_tip_y = None
+        middle_tip_y = None
+        ring_tip_y = None
+        pinky_tip_y = None
+        thumb_tip_y = None
+
+        if result.handedness[0][0].category_name == "Left":
+            thumb_tip_y = result.hand_landmarks[0][4].y
+            index_tip_y = result.hand_landmarks[0][8].y
+            middle_tip_y = result.hand_landmarks[0][12].y
+            ring_tip_y = result.hand_landmarks[0][16].y
+            pinky_tip_y = result.hand_landmarks[0][20].y
+
+        elif result.handedness[0][0].category_name == "Right":
+            thumb_tip_y = result.hand_landmarks[1][4].y
+            index_tip_y = result.hand_landmarks[1][8].y
+            middle_tip_y = result.hand_landmarks[1][12].y
+            ring_tip_y = result.hand_landmarks[1][16].y
+            pinky_tip_y = result.hand_landmarks[1][20].y
+
+        if not (pinky_tip_y < thumb_tip_y and
+                pinky_tip_y < index_tip_y and
+                pinky_tip_y < middle_tip_y and
+                pinky_tip_y < ring_tip_y):
+            return False
+
+        return True
+
+    except Exception as e:
+        print(e)
+        return False
+
