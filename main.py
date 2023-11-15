@@ -45,7 +45,7 @@ def playsound(result: GestureRecognizerResult, output_image: mp.Image, timestamp
                 single_tone(left_hand_gesture, result)
 
         else:
-            print("No gesture detected")
+            return
 
     except Exception as e:
         print(e)
@@ -105,6 +105,7 @@ def render_text(frame):
 
 def main():
     gesture_thread = threading.Thread(target=gesture_recognition_and_audio_playback, args=(frame_queue,))
+    gesture_thread.daemon = True
     gesture_thread.start()
 
     # Initialize OpenCV video capture
