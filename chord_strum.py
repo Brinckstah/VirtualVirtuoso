@@ -1,3 +1,4 @@
+import gestures
 import single_string_chords
 import sound
 import gesture_recognition
@@ -52,7 +53,7 @@ def gesture_response(right_hand_gesture, left_hand_gesture, result):
             elif direction == 1:
                 sound.channel1.play(sound.D_R)
 
-        elif gesture_recognition.is_pinky_up(result):
+        elif gestures.is_pinky_up(result):
             if direction == 0:
                 sound.channel1.play(sound.Emin_Chord)
 
@@ -80,7 +81,7 @@ def gesture_response(right_hand_gesture, left_hand_gesture, result):
             elif direction == 1:
                 sound.channel1.play(sound.A_R)
 
-        elif gesture_recognition.is_gesture_L(result):
+        elif gestures.is_gesture_L(result):
             if direction == 0:
                 sound.channel1.play(sound.Bdim_Chord)
 
@@ -91,14 +92,14 @@ def gesture_response(right_hand_gesture, left_hand_gesture, result):
             return
         config.last_played_y_coordinate = y_coordinate
 
-    elif gesture_recognition.is_picking(result):
+    elif gestures.is_picking(result):
         if left_hand_gesture == 'Victory':
             single_string_chords.tone_selector(result, "C")
 
         elif left_hand_gesture == 'ILoveYou':
             single_string_chords.tone_selector(result, "D")
 
-        elif gesture_recognition.is_pinky_up(result):
+        elif gestures.is_pinky_up(result):
             single_string_chords.tone_selector(result, "E")
 
         elif left_hand_gesture == 'Closed_Fist':
@@ -110,27 +111,8 @@ def gesture_response(right_hand_gesture, left_hand_gesture, result):
         elif left_hand_gesture == 'Open_Palm':
             single_string_chords.tone_selector(result, "A")
 
-        elif gesture_recognition.is_gesture_L(result):
+        elif gestures.is_gesture_L(result):
             single_string_chords.tone_selector(result, "B")
 
-            """
-        if left_hand_gesture == 'Victory':
-            sound.play_sound(sound.C_Tone)
-            last_played_y_coordinate = gesture_recognition.find_y_coordinate(result, "Index")
-
-        elif left_hand_gesture == 'Thumb_Up':
-            sound.play_sound(sound.D_Tone)
-            last_played_y_coordinate = gesture_recognition.find_y_coordinate(result, "Index")
-
-        elif left_hand_gesture == 'Thumb_Down':
-            sound.play_sound(sound.E_Tone)
-            last_played_y_coordinate = gesture_recognition.find_y_coordinate(result, "Index")
-
-        elif left_hand_gesture == 'Pointing_Up':
-            sound.play_sound(sound.F_Tone)
-            last_played_y_coordinate = gesture_recognition.find_y_coordinate(result, "Index")
-
-        elif left_hand_gesture == 'Open_Palm':
-            sound.play_sound(sound.G_Tone)
-            last_played_y_coordinate = gesture_recognition.find_y_coordinate(result, "Index")
-            """
+        else:
+            return

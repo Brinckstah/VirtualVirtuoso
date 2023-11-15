@@ -2,13 +2,15 @@ import mediapipe as mp
 from mediapipe.tasks import python
 import cv2
 import time
-
-from chord_strum import gesture_response
-import config
-import gesture_recognition
-from single_string import single_tone
 import queue
 import threading
+
+import config
+import gesture_recognition
+import gestures
+from chord_strum import gesture_response
+from single_string import single_tone
+
 
 string_distance = 0.05
 frame_queue = queue.Queue()
@@ -36,7 +38,7 @@ def playsound(result: GestureRecognizerResult, output_image: mp.Image, timestamp
             config.mode = 2
             return
 
-        if len(result.gestures) == 2 and (left_hand_gesture in list_of_gestures or gesture_recognition.is_gesture_L(result) or gesture_recognition.is_pinky_up(result)):
+        if len(result.gestures) == 2 and (left_hand_gesture in list_of_gestures or gestures.is_gesture_L(result) or gestures.is_pinky_up(result)):
             if config.mode == 1:
                 gesture_response(right_hand_gesture, left_hand_gesture, result)
             elif config.mode == 2:
@@ -46,11 +48,8 @@ def playsound(result: GestureRecognizerResult, output_image: mp.Image, timestamp
             print("No gesture detected")
 
     except Exception as e:
+        print(e)
         pass
-
-
-def print_result(result: GestureRecognizerResult, output_image: mp.Image, timestamp_ms: int):
-    print('gesture recognition result: {}'.format(result))
 
 
 def dummy_callback_function(result: GestureRecognizerResult, output_image: mp.Image, timestamp_ms: int):
@@ -84,11 +83,7 @@ def gesture_recognition_and_audio_playback(frame_queue: queue.Queue):
         recognizer.recognize_async(mp_image, timestamp)
 
 
-gesture_thread = threading.Thread(target=gesture_recognition_and_audio_playback, args=(frame_queue,))
-gesture_thread.start()
-
-
-def render_text():
+def render_text(frame):
     text = None
     if config.mode == 1:
         text = "Mode: Chord Strumming"
@@ -108,60 +103,58 @@ def render_text():
     cv2.putText(frame, text, (text_x, text_y), font, font_scale, color, thickness)
 
 
-y_threshold = 240
+def main():
+    gesture_thread = threading.Thread(target=gesture_recognition_and_audio_playback, args=(frame_queue,))
+    gesture_thread.start()
 
-# Initialize OpenCV video capture
-VideoCapture = cv2.VideoCapture(0)
-VideoCapture.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
-VideoCapture.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
+    # Initialize OpenCV video capture
+    VideoCapture = cv2.VideoCapture(0)
+    VideoCapture.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
+    VideoCapture.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
 
+    while VideoCapture.isOpened():
+        ret, frame = VideoCapture.read()
 
-start_time = time.time()
+        # Checks if there is an issue with frame capture, and breaks if there isq
+        if not ret:
+            break
 
+        y, x, _ = frame.shape
 
-while VideoCapture.isOpened():
-    ret, frame = VideoCapture.read()
+        # Convert the BGR frame to RGB.
+        # OpenCV reads image data in BGR, while mediaPipe expects RGB
+        frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        frame_queue.put(frame_rgb)
 
-    # Checks if there is an issue with frame capture, and breaks if there isq
-    if not ret:
-        break
+        render_text(frame)
 
-    y, x, _ = frame.shape
+        if config.mode == 1:
+            cv2.line(frame, (0, int(0.5 * y)), (int(x), int(0.5 * y)), (0, 255, 0), 1)
+            cv2.line(frame, (0, int((0.5 + string_distance) * y)), (int(x), int((0.5 + string_distance) * y)), (0, 255, 0),
+                     1)
+            cv2.line(frame, (0, int((0.5 + 2 * string_distance) * y)), (int(x), int((0.5 + 2 * string_distance) * y)),
+                     (0, 255, 0), 1)
+            cv2.line(frame, (0, int((0.5 + 3 * string_distance) * y)), (int(x), int((0.5 + 3 * string_distance) * y)),
+                     (0, 255, 0), 1)
+            cv2.line(frame, (0, int((0.5 + 4 * string_distance) * y)), (int(x), int((0.5 + 4 * string_distance) * y)),
+                     (0, 255, 0), 1)
+            cv2.line(frame, (0, int((0.5 + 5 * string_distance) * y)), (int(x), int((0.5 + 5 * string_distance) * y)),
+                     (0, 255, 0), 1)
 
-    # Convert the BGR frame to RGB.
-    # OpenCV reads image data in BGR, while mediaPipe expects RGB
-    frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-    frame_queue.put(frame_rgb)
+        elif config.mode == 2:
+            cv2.line(frame, (0, int(0.5 * y)), (int(x), int(0.5 * y)), (0, 255, 0), 1)
 
-    render_text()
+        # Show the current frame
+        cv2.imshow('Gesture Recognition', frame)
 
-    if config.mode == 1:
-        cv2.line(frame, (0, int(0.5 * y)), (int(x), int(0.5 * y)), (0, 255, 0), 1)
-        cv2.line(frame, (0, int((0.5 + string_distance) * y)), (int(x), int((0.5 + string_distance) * y)), (0, 255, 0),
-                 1)
-        cv2.line(frame, (0, int((0.5 + 2 * string_distance) * y)), (int(x), int((0.5 + 2 * string_distance) * y)),
-                 (0, 255, 0), 1)
-        cv2.line(frame, (0, int((0.5 + 3 * string_distance) * y)), (int(x), int((0.5 + 3 * string_distance) * y)),
-                 (0, 255, 0), 1)
-        cv2.line(frame, (0, int((0.5 + 4 * string_distance) * y)), (int(x), int((0.5 + 4 * string_distance) * y)),
-                 (0, 255, 0), 1)
-        cv2.line(frame, (0, int((0.5 + 5 * string_distance) * y)), (int(x), int((0.5 + 5 * string_distance) * y)),
-                 (0, 255, 0), 1)
+        # Press q to quit
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
 
-    elif config.mode == 2:
-        cv2.line(frame, (0, int(0.5 * y)), (int(x), int(0.5 * y)), (0, 255, 0), 1)
-
-    # Show the current frame
-    cv2.imshow('Gesture Recognition', frame)
-
-    # Press q to quit
-    if cv2.waitKey(1) & 0xFF == ord('q'):
-        break
-
-# Close the VideoCapture
-VideoCapture.release()
-cv2.destroyAllWindows()
+    # Close the VideoCapture
+    VideoCapture.release()
+    cv2.destroyAllWindows()
 
 
-#if __name__ == '__main__':
- #   app.main()
+if __name__ == '__main__':
+    main()

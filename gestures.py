@@ -1,51 +1,97 @@
-import mediapipe as mp
+def is_picking(result):
+    try:
+        index_tip = None
+        hand = None
 
-mp_hands = mp.solutions.hands
+        if result.handedness[0][0].category_name == "Right":
+            index_tip = result.hand_landmarks[0][8].x
+            hand = 0
 
+        elif result.handedness[0][0].category_name == "Left":
+            index_tip = result.hand_landmarks[1][8].x
+            hand = 1
 
-def is_thumbs_up(hand_landmarks):
-    # Get the landmarks for the thumb's tip and base.
-    thumb_tip = hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_TIP]
-    thumb_base = hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_CMC]
-
-    # Check if the thumb's tip is above its base.
-    if thumb_tip.y < thumb_base.y:
-        # Check if other fingers are not extended.
-        for finger in [mp_hands.HandLandmark.INDEX_FINGER_TIP,
-                       mp_hands.HandLandmark.MIDDLE_FINGER_TIP,
-                       mp_hands.HandLandmark.RING_FINGER_TIP,
-                       mp_hands.HandLandmark.PINKY_TIP]:
-            if hand_landmarks.landmark[finger].y < thumb_base.y:
-                return False
-        return True
-    return False
-
-
-def is_finger_up(hand_landmarks):
-    # Get the landmarks for the index finger's tip and base.
-    pointer_tip = hand_landmarks.landmark[mp_hands.HandLandmark.INDEX_FINGER_TIP]
-    pointer_base = hand_landmarks.landmark[mp_hands.HandLandmark.INDEX_FINGER_PIP]
-
-    # Check if the index finger's tip is above its base.
-    if pointer_tip.y < pointer_base.y:
-        # Check if other fingers (excluding index) are not extended.
-        for finger in [mp_hands.HandLandmark.MIDDLE_FINGER_TIP,
-                       mp_hands.HandLandmark.RING_FINGER_TIP,
-                       mp_hands.HandLandmark.PINKY_TIP]:
-            if hand_landmarks.landmark[finger].y < pointer_base.y:
-                return False
-        return True
-    return False
-
-
-def is_finger_down(hand_landmarks):
-    # Get the landmarks for the index finger's tip and base.
-    pointer_tip = hand_landmarks.landmark[mp_hands.HandLandmark.INDEX_FINGER_TIP]
-    pointer_base = hand_landmarks.landmark[mp_hands.HandLandmark.INDEX_FINGER_PIP]
-
-    # Check if the index finger's tip is below its base.
-    if pointer_tip.y > pointer_base.y:  # Use '>' for down
-        return True
-    else:
+        if (index_tip > result.hand_landmarks[hand][6].x and
+                index_tip > result.hand_landmarks[hand][12].x and
+                index_tip > result.hand_landmarks[hand][16].x and
+                index_tip > result.hand_landmarks[hand][20].x):
+            return True
+        else:
+            return False
+    except Exception as e:
+        print(e)
         return False
 
+
+def is_gesture_L(result):
+    try:
+        index_tip_y = None
+        thumb_tip_x = None
+        thumb_ip_x = None
+        hand = None
+
+        if result.handedness[0][0].category_name == "Left":
+            index_tip_y = result.hand_landmarks[0][8].y
+            thumb_tip_x = result.hand_landmarks[0][4].x
+            thumb_ip_x = result.hand_landmarks[0][3].x
+            hand = 0
+
+            print(index_tip_y, thumb_tip_x, thumb_ip_x)
+
+        elif result.handedness[0][0].category_name == "Right":
+            index_tip_y = result.hand_landmarks[1][8].y
+            thumb_tip_x = result.hand_landmarks[1][4].x
+            thumb_ip_x = result.hand_landmarks[1][3].x
+            hand = 1
+
+            print(index_tip_y, thumb_tip_x, thumb_ip_x, "Right")
+
+        if not (index_tip_y < result.hand_landmarks[hand][6].y and
+                index_tip_y < result.hand_landmarks[hand][12].y and
+                index_tip_y < result.hand_landmarks[hand][16].y and
+                index_tip_y < result.hand_landmarks[hand][20].y):
+            return False
+
+        if not (thumb_tip_x < thumb_ip_x):
+            return False
+
+        return True
+
+    except Exception as e:
+        print(e)
+        return False
+
+
+def is_pinky_up(result):
+    try:
+        index_tip_y = None
+        middle_tip_y = None
+        ring_tip_y = None
+        pinky_tip_y = None
+        thumb_tip_y = None
+
+        if result.handedness[0][0].category_name == "Left":
+            thumb_tip_y = result.hand_landmarks[0][4].y
+            index_tip_y = result.hand_landmarks[0][8].y
+            middle_tip_y = result.hand_landmarks[0][12].y
+            ring_tip_y = result.hand_landmarks[0][16].y
+            pinky_tip_y = result.hand_landmarks[0][20].y
+
+        elif result.handedness[0][0].category_name == "Right":
+            thumb_tip_y = result.hand_landmarks[1][4].y
+            index_tip_y = result.hand_landmarks[1][8].y
+            middle_tip_y = result.hand_landmarks[1][12].y
+            ring_tip_y = result.hand_landmarks[1][16].y
+            pinky_tip_y = result.hand_landmarks[1][20].y
+
+        if not (pinky_tip_y < thumb_tip_y and
+                pinky_tip_y < index_tip_y and
+                pinky_tip_y < middle_tip_y and
+                pinky_tip_y < ring_tip_y):
+            return False
+
+        return True
+
+    except Exception as e:
+        print(e)
+        return False

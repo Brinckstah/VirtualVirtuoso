@@ -56,13 +56,3 @@ channel3 = pygame.mixer.Channel(2)
 channel4 = pygame.mixer.Channel(3)
 channel5 = pygame.mixer.Channel(4)
 channel6 = pygame.mixer.Channel(5)
-
-
-"""
-def gesture_response(result):
-    global last_played_y_coordinate
-
-    y_coordinate = find_y_coordinate(result)
-    tone_selector(y_coordinate)
-"""
-

@@ -51,7 +51,7 @@ def tone_selector(result, current_chord):
             sound.channel6.play(sound.chord_tones[current_chord][5])
 
     else:
-        print("muted or invalid pluck")
+        return
 
     # Update the last played y-coordinate.
     config.last_played_y_coordinate = y_coordinate
