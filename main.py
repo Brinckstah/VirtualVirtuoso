@@ -80,6 +80,9 @@ def gesture_recognition_and_audio_playback(frame_queue: queue.Queue):
 
         recognizer.recognize_async(mp_image, timestamp)
 
+        if config.terminate:
+            break
+
 
 def render_text(frame):
     text = None
@@ -87,8 +90,8 @@ def render_text(frame):
         text = "Mode: Chord Strumming"
     elif config.mode == 2:
         text = "Mode: Single String Picking"
-    font = cv2.FONT_HERSHEY_SIMPLEX
-    font_scale = 0.6
+    font = cv2.FONT_ITALIC
+    font_scale = 0.8
     color = (255, 255, 255)
     thickness = 1
     text_size, _ = cv2.getTextSize(text, font, font_scale, thickness)
@@ -147,6 +150,7 @@ def main():
             break
 
     # Close the VideoCapture
+    config.terminate = True
     VideoCapture.release()
     cv2.destroyAllWindows()
 
