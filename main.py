@@ -11,7 +11,6 @@ import gestures
 from chord_strum import gesture_response
 from single_string import single_tone
 
-
 string_distance = 0.05
 frame_queue = queue.Queue()
 
@@ -47,8 +46,7 @@ def playsound(result: GestureRecognizerResult, output_image: mp.Image, timestamp
         else:
             return
 
-    except Exception as e:
-        print(e)
+    except:
         pass
 
 

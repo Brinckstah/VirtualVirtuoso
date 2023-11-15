@@ -1,3 +1,5 @@
+![img.png](images/logo.png)
+
 # VirtualVirtuoso
 IKT213 - Machine vision project
 
