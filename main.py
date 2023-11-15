@@ -29,11 +29,11 @@ list_of_gestures = ['Victory', 'ILoveYou', 'Thumb_Up', 'Closed_Fist', 'Pointing_
 def playsound(result: GestureRecognizerResult, output_image: mp.Image, timestamp_ms: int):
     try:
         right_hand_gesture, left_hand_gesture = gesture_recognition.find_right_and_left_gesture(result)
-        if right_hand_gesture == 'Victory':
+        if right_hand_gesture == 'Open_Palm' and left_hand_gesture == 'Open_Palm':
             config.mode = 1
             return
 
-        elif right_hand_gesture == 'Thumb_Down':
+        elif right_hand_gesture == 'Victory' and left_hand_gesture == 'Victory':
             config.mode = 2
             return
 
