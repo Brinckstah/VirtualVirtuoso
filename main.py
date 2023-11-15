@@ -56,6 +56,7 @@ def print_result(result: GestureRecognizerResult, output_image: mp.Image, timest
 def dummy_callback_function(result: GestureRecognizerResult, output_image: mp.Image, timestamp_ms: int):
     pass
 
+
 # Setting gesture recognizer options
 options = GestureRecognizerOptions(
     base_options=BaseOptions(model_asset_path=model_path),
