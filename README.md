@@ -43,12 +43,12 @@ These are the available gestures:
 | B diminished and B tone                           | ![L.png](/images/L.png "L").                               |
 
 
-| Right Hand Gestures                                                  | Picture                                               |
-|----------------------------------------------------------------------|-------------------------------------------------------|
-| Change mode to first                                                 | ![victory.png](/images/victory.png "Victory")         |
-| Change mode to second                                                | ![thumb_down.png](images/thumb_down.png "Thumb Down") | 
-| Play full chord (mode 1)                                             | ![img.png](images/thumb_up.png "Thumb Up")            |
-| Strum chord string by string (mode 1)<br/> play single note (mode 2) | ![point_left.png](images/point_left.png "Point Left") |
+| Right Hand Gestures                                                     | Picture                                               |
+|-------------------------------------------------------------------------|-------------------------------------------------------|
+| By forming the open palm gesture with both hands, mode will switch to 1 | ![open_palm.png](/images/open_palm.png "Victory")     |
+| By forming the victory gesture with both hands, mode will switch to 2   | ![victory.png](images/victory.png "Thumb Down")       | 
+| Play full chord (mode 1)                                                | ![img.png](images/thumb_up.png "Thumb Up")            |
+| Strum chord string by string (mode 1) play single note (mode 2)         | ![point_left.png](images/point_left.png "Point Left") |
 
 ## Features
 - This our software can dooooo

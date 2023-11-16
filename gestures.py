@@ -38,6 +38,8 @@ def is_gesture_L(result):
         thumb_ip_x = None
         hand = None
 
+        # TODO: Check Y-coordinates of index tip vs Y-coordinate of thumb tip
+
         if result.handedness[0][0].category_name == "Left":
             index_tip_y = result.hand_landmarks[0][8].y
             thumb_tip_x = result.hand_landmarks[0][4].x

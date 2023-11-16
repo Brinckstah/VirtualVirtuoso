@@ -7,7 +7,6 @@ import threading
 
 import config
 import gesture_recognition
-import gestures
 from chord_strum import gesture_response
 from single_string import single_tone
 
@@ -28,24 +27,22 @@ list_of_gestures = ['Victory', 'ILoveYou', 'Thumb_Up', 'Closed_Fist', 'Pointing_
 
 def playsound(result: GestureRecognizerResult, output_image: mp.Image, timestamp_ms: int):
     try:
-        right_hand_gesture, left_hand_gesture = gesture_recognition.find_right_and_left_gesture(result)
-        if right_hand_gesture == 'Open_Palm' and left_hand_gesture == 'Open_Palm':
-            config.mode = 1
-            return
+        if len(result.gestures) == 2:
+            right_hand_gesture, left_hand_gesture = gesture_recognition.find_right_and_left_gesture(result)
+            if right_hand_gesture == 'Open_Palm' and left_hand_gesture == 'Open_Palm':
+                config.mode = 1
+                return
 
-        elif right_hand_gesture == 'Victory' and left_hand_gesture == 'Victory':
-            config.mode = 2
-            return
+            elif right_hand_gesture == 'Victory' and left_hand_gesture == 'Victory':
+                config.mode = 2
+                return
 
-        if len(result.gestures) == 2 and (left_hand_gesture in list_of_gestures or gestures.is_gesture_L(result) or gestures.is_pinky_up(result)):
             if config.mode == 1:
                 gesture_response(right_hand_gesture, left_hand_gesture, result)
             elif config.mode == 2:
                 single_tone(left_hand_gesture, result)
-
         else:
             return
-
     except:
         pass
 
@@ -90,10 +87,10 @@ def render_text(frame):
         text = "Mode: Chord Strumming"
     elif config.mode == 2:
         text = "Mode: Single String Picking"
-    font = cv2.FONT_ITALIC
+    font = cv2.FONT_HERSHEY_PLAIN
     font_scale = 0.8
     color = (255, 255, 255)
-    thickness = 1
+    thickness = 2
     text_size, _ = cv2.getTextSize(text, font, font_scale, thickness)
 
     text_x = frame.shape[1] - text_size[0] - 10
