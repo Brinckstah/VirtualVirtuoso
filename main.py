@@ -7,9 +7,11 @@ import threading
 
 import config
 import gesture_recognition
+import gestures
 from chord_strum import gesture_response
 from single_string import single_tone
 
+# Distance between strings to be used for chord strumming. Corresponds to rendered strings.
 string_distance = 0.05
 frame_queue = queue.Queue()
 
@@ -20,27 +22,30 @@ GestureRecognizerOptions = mp.tasks.vision.GestureRecognizerOptions
 GestureRecognizerResult = mp.tasks.vision.GestureRecognizerResult
 VisionRunningMode = mp.tasks.vision.RunningMode
 
+# Path to the gesture recognizer model
 model_path = 'models/gesture_recognizer.task'
-
-list_of_gestures = ['Victory', 'ILoveYou', 'Thumb_Up', 'Closed_Fist', 'Pointing_Up', 'Open_Palm', 'Thumb_Down']
 
 
 def playsound(result: GestureRecognizerResult, output_image: mp.Image, timestamp_ms: int):
     try:
+        # Checks number of gestures recognized
         if len(result.gestures) == 2:
             right_hand_gesture, left_hand_gesture = gesture_recognition.find_right_and_left_gesture(result)
-            if right_hand_gesture == 'Open_Palm' and left_hand_gesture == 'Open_Palm':
-                config.mode = 1
-                return
+            if (right_hand_gesture is not None and left_hand_gesture is not None) or gestures.is_picking(result) or gestures.is_gesture_L or gestures.is_pinky_up:
+                if right_hand_gesture == 'Open_Palm' and left_hand_gesture == 'Open_Palm':
+                    config.mode = 1
+                    return
 
-            elif right_hand_gesture == 'Victory' and left_hand_gesture == 'Victory':
-                config.mode = 2
-                return
+                elif right_hand_gesture == 'Victory' and left_hand_gesture == 'Victory':
+                    config.mode = 2
+                    return
 
-            if config.mode == 1:
-                gesture_response(right_hand_gesture, left_hand_gesture, result)
-            elif config.mode == 2:
-                single_tone(left_hand_gesture, result)
+                if config.mode == 1:
+                    gesture_response(right_hand_gesture, left_hand_gesture, result)
+                elif config.mode == 2:
+                    single_tone(left_hand_gesture, result)
+            else:
+                return
         else:
             return
     except:
@@ -62,14 +67,21 @@ options = GestureRecognizerOptions(
 
 def gesture_recognition_and_audio_playback(frame_queue: queue.Queue):
     def process_result_callback(result: GestureRecognizerResult, output_image: mp.Image, timestamp_ms: int):
+        # Callback function for the second thread
         playsound(result, output_image, timestamp_ms)
 
+    # Change the callback function in the function to process the result
     options.result_callback = process_result_callback
+
+    # Create a separate recognizer object
     recognizer = GestureRecognizer.create_from_options(options)
 
     while True:
+        # If the queue is empty, break
         if not frame_queue.empty():
             break
+
+        # Get the frame in front of the queue
         first_frame = frame_queue.get()
 
         mp_image = mp.Image(image_format=mp.ImageFormat.SRGB, data=first_frame)
@@ -87,13 +99,18 @@ def render_text(frame):
         text = "Mode: Chord Strumming"
     elif config.mode == 2:
         text = "Mode: Single String Picking"
-    font = cv2.FONT_HERSHEY_PLAIN
-    font_scale = 0.8
+    font = cv2.FONT_HERSHEY_SIMPLEX
+    font_scale = 1
     color = (255, 255, 255)
     thickness = 2
-    text_size, _ = cv2.getTextSize(text, font, font_scale, thickness)
 
+    # Get the required text box size based on font parameters
+    text_size, x = cv2.getTextSize(text, font, font_scale, thickness)
+
+    # Set the text start position based on the image size, and the text box size calcuated above
     text_x = frame.shape[1] - text_size[0] - 10
+
+    # Places the text 10 pixels below the top of the frame
     text_y = text_size[1] + 10
 
     cv2.putText(frame, text, (text_x, text_y), font, font_scale, color, thickness)
@@ -139,14 +156,12 @@ def main():
         elif config.mode == 2:
             cv2.line(frame, (0, int(0.5 * y)), (int(x), int(0.5 * y)), (0, 255, 0), 1)
 
-        # Show the current frame
         cv2.imshow('Gesture Recognition', frame)
 
-        # Press q to quit
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
 
-    # Close the VideoCapture
+    # Set terminate to True, causing the second thread to terminate
     config.terminate = True
     VideoCapture.release()
     cv2.destroyAllWindows()

@@ -1,3 +1,4 @@
+# New gesture. Checks if the index finger is extended to the right of the hand.
 def is_picking(result):
     try:
         index_tip = None
@@ -31,31 +32,36 @@ def is_picking(result):
         return False
 
 
+# New gesture. Checks if the index finger and the thumb are extended, forming an L.
 def is_gesture_L(result):
     try:
         index_tip_y = None
         thumb_tip_x = None
+        thumb_tip_y = None
         thumb_ip_x = None
         hand = None
-
-        # TODO: Check Y-coordinates of index tip vs Y-coordinate of thumb tip
 
         if result.handedness[0][0].category_name == "Left":
             index_tip_y = result.hand_landmarks[0][8].y
             thumb_tip_x = result.hand_landmarks[0][4].x
+            # Included check for thumb tip vs index finger tip
+            thumb_tip_y = result.hand_landmarks[0][4].y
             thumb_ip_x = result.hand_landmarks[0][3].x
             hand = 0
 
         elif result.handedness[0][0].category_name == "Right":
             index_tip_y = result.hand_landmarks[1][8].y
             thumb_tip_x = result.hand_landmarks[1][4].x
+            thumb_tip_y = result.hand_landmarks[1][4].y
             thumb_ip_x = result.hand_landmarks[1][3].x
             hand = 1
 
         if not (index_tip_y < result.hand_landmarks[hand][6].y and
                 index_tip_y < result.hand_landmarks[hand][12].y and
                 index_tip_y < result.hand_landmarks[hand][16].y and
-                index_tip_y < result.hand_landmarks[hand][20].y):
+                index_tip_y < result.hand_landmarks[hand][20].y and
+                thumb_tip_y > result.hand_landmarks[hand][6].y
+        ):
             return False
 
         if not (thumb_tip_x < thumb_ip_x):
@@ -68,6 +74,7 @@ def is_gesture_L(result):
         return False
 
 
+# New gesture. Checks if the pinky is extended and the other fingers are not
 def is_pinky_up(result):
     try:
         index_tip_y = None

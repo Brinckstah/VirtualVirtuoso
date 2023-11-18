@@ -93,7 +93,6 @@ def gesture_response(right_hand_gesture, left_hand_gesture, result):
         config.last_played_y_coordinate = y_coordinate
 
     elif gestures.is_picking(result):
-        print("Picking")
         if left_hand_gesture == 'Victory':
             single_string_chords.tone_selector(result, "C")
 
