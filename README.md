@@ -19,7 +19,7 @@ gestures see the [Gestures](#gestures) section.
 There application consists of two different modes.
 When starting the application, the 
 active mode is **chord strumming**. In this mode you can play chords in two ways. 
-1. By moving forming a thumbs up with your right hand, and then moving the tip of your thumb from above to below the upper string, or the other way around.
+1. By moving forming a thumbs up with your right hand, and then moving the tip of your thumb over the three upper strings in either direction.
 2. By moving the tip of your index finger over a string, you will play the note of that string. 
 
 The second mode is single string picking. In this mode you can play single notes by moving the tip of your index finger over a string.
