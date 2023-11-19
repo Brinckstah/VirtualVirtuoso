@@ -5,6 +5,7 @@ def is_picking(result):
         index_dip = None
         index_pip = None
         thumb_tip = None
+        middle_finger_pip = None
         hand = None
 
         if result.handedness[0][0].category_name == "Right":
@@ -12,6 +13,7 @@ def is_picking(result):
             index_dip = result.hand_landmarks[0][7].x
             index_pip = result.hand_landmarks[0][6].x
             thumb_tip = result.hand_landmarks[0][4].x
+            middle_finger_pip = result.hand_landmarks[0][10].x
             hand = 0
 
         elif result.handedness[0][0].category_name == "Left":
@@ -19,12 +21,14 @@ def is_picking(result):
             index_dip = result.hand_landmarks[1][7].x
             index_pip = result.hand_landmarks[1][6].x
             thumb_tip = result.hand_landmarks[1][4].x
+            middle_finger_pip = result.hand_landmarks[1][10].x
             hand = 1
 
         if (index_tip > result.hand_landmarks[hand][6].x and
                 index_tip > index_dip and
                 index_tip > index_pip and
                 index_tip > thumb_tip and
+                index_tip > middle_finger_pip and
                 index_tip > result.hand_landmarks[hand][12].x and
                 index_tip > result.hand_landmarks[hand][16].x and
                 index_tip > result.hand_landmarks[hand][20].x):
