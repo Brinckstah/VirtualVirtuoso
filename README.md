@@ -50,8 +50,6 @@ These are the available gestures:
 | Play full chord (mode 1)                                                | ![img.png](images/thumb_up.png "Thumb Up")            |
 | Strum chord string by string (mode 1) play single note (mode 2)         | ![point_left.png](images/point_left.png "Point Left") |
 
-## Features
-- This our software can dooooo
 
 ## Dependency installation
 pip install -r requirements.txt

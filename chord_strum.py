@@ -13,21 +13,16 @@ def hello_from_the_other_side(result, landmark):
     y_coordinate = gesture_recognition.find_y_coordinate(result, landmark)
 
     if landmark == "Thumb":
-        if config.last_played_y_coordinate >= 0.75:
+        if config.last_played_y_coordinate >= 0.6:
             if y_coordinate <= 0.5:
                 return True
             else:
                 return False
 
         elif config.last_played_y_coordinate <= 0.5:
-            if y_coordinate >= 0.75:
+            if y_coordinate >= 0.6:
                 return True
             else:
-                return False
-
-        else:
-            if y_coordinate >= 0.75 or y_coordinate <= 0.5:
-                config.last_played_y_coordinate = y_coordinate
                 return False
 
     elif landmark == "Index":
@@ -65,12 +60,24 @@ def gesture_response(right_hand_gesture, left_hand_gesture, result):
             elif direction == 1:
                 sound.channel1.play(sound.C_R)
 
+            sound.channel2.stop()
+            sound.channel3.stop()
+            sound.channel4.stop()
+            sound.channel5.stop()
+            sound.channel6.stop()
+
         elif left_hand_gesture == 'ILoveYou':
             if direction == 0:
                 sound.channel1.play(sound.Dmin_Chord)
 
             elif direction == 1:
                 sound.channel1.play(sound.D_R)
+
+            sound.channel2.stop()
+            sound.channel3.stop()
+            sound.channel4.stop()
+            sound.channel5.stop()
+            sound.channel6.stop()
 
         elif gestures.is_pinky_up(result):
             if direction == 0:
@@ -79,12 +86,24 @@ def gesture_response(right_hand_gesture, left_hand_gesture, result):
             elif direction == 1:
                 sound.channel1.play(sound.E_R)
 
+            sound.channel2.stop()
+            sound.channel3.stop()
+            sound.channel4.stop()
+            sound.channel5.stop()
+            sound.channel6.stop()
+
         elif left_hand_gesture == 'Closed_Fist':
             if direction == 0:
                 sound.channel1.play(sound.Fmaj_Chord)
 
             elif direction == 1:
                 sound.channel1.play(sound.F_R)
+
+            sound.channel2.stop()
+            sound.channel3.stop()
+            sound.channel4.stop()
+            sound.channel5.stop()
+            sound.channel6.stop()
 
         elif left_hand_gesture == 'Pointing_Up':
             if direction == 0:
@@ -93,6 +112,12 @@ def gesture_response(right_hand_gesture, left_hand_gesture, result):
             elif direction == 1:
                 sound.channel1.play(sound.G_R)
 
+            sound.channel2.stop()
+            sound.channel3.stop()
+            sound.channel4.stop()
+            sound.channel5.stop()
+            sound.channel6.stop()
+
         elif left_hand_gesture == 'Open_Palm':
             if direction == 0:
                 sound.channel1.play(sound.Amin_Chord)
@@ -100,12 +125,24 @@ def gesture_response(right_hand_gesture, left_hand_gesture, result):
             elif direction == 1:
                 sound.channel1.play(sound.A_R)
 
+            sound.channel2.stop()
+            sound.channel3.stop()
+            sound.channel4.stop()
+            sound.channel5.stop()
+            sound.channel6.stop()
+
         elif gestures.is_gesture_L(result):
             if direction == 0:
                 sound.channel1.play(sound.Bdim_Chord)
 
             elif direction == 1:
                 sound.channel1.play(sound.B_R)
+
+            sound.channel2.stop()
+            sound.channel3.stop()
+            sound.channel4.stop()
+            sound.channel5.stop()
+            sound.channel6.stop()
 
         else:
             return
