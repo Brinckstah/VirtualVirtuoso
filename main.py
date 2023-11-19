@@ -31,19 +31,19 @@ def playsound(result: GestureRecognizerResult, output_image: mp.Image, timestamp
         # Checks number of gestures recognized
         if len(result.gestures) == 2:
             right_hand_gesture, left_hand_gesture = gesture_recognition.find_right_and_left_gesture(result)
-            if (right_hand_gesture is not None and left_hand_gesture is not None) or gestures.is_picking(result) or gestures.is_gesture_L or gestures.is_pinky_up:
-                if right_hand_gesture == 'Open_Palm' and left_hand_gesture == 'Open_Palm':
-                    config.mode = 1
-                    return
 
-                elif right_hand_gesture == 'Victory' and left_hand_gesture == 'Victory':
-                    config.mode = 2
-                    return
+            if right_hand_gesture == 'Open_Palm' and left_hand_gesture == 'Open_Palm':
+                config.mode = 1
+                return
 
-                if config.mode == 1:
-                    gesture_response(right_hand_gesture, left_hand_gesture, result)
-                elif config.mode == 2:
-                    single_tone(left_hand_gesture, result)
+            elif right_hand_gesture == 'Victory' and left_hand_gesture == 'Victory':
+                config.mode = 2
+                return
+
+            if config.mode == 1:
+                gesture_response(right_hand_gesture, left_hand_gesture, result)
+            elif config.mode == 2:
+                single_tone(left_hand_gesture, result)
             else:
                 return
         else:

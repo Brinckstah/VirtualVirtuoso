@@ -36,6 +36,7 @@ def is_picking(result):
 def is_gesture_L(result):
     try:
         index_tip_y = None
+        index_dip_y = None
         thumb_tip_x = None
         thumb_tip_y = None
         thumb_ip_x = None
@@ -57,11 +58,11 @@ def is_gesture_L(result):
             hand = 1
 
         if not (index_tip_y < result.hand_landmarks[hand][6].y and
+                index_tip_y < result.hand_landmarks[hand][7].y and
                 index_tip_y < result.hand_landmarks[hand][12].y and
                 index_tip_y < result.hand_landmarks[hand][16].y and
                 index_tip_y < result.hand_landmarks[hand][20].y and
-                thumb_tip_y > result.hand_landmarks[hand][6].y
-        ):
+                thumb_tip_y > result.hand_landmarks[hand][6].y):
             return False
 
         if not (thumb_tip_x < thumb_ip_x):
