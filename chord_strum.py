@@ -12,14 +12,14 @@ def hello_from_the_other_side(result, landmark):
 
     y_coordinate = gesture_recognition.find_y_coordinate(result, landmark)
 
-    if config.last_played_y_coordinate > 0.5:
+    if config.last_played_y_coordinate >= 0.75:
         if y_coordinate <= 0.5:
             return True
         else:
             return False
 
     elif config.last_played_y_coordinate <= 0.5:
-        if y_coordinate > 0.5:
+        if y_coordinate >= 0.75:
             return True
         else:
             return False
